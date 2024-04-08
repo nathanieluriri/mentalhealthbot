@@ -3,5 +3,5 @@ openai==1.16.2
 secure-smtplib
 pymodm==0.4.3
 bcrypt
-pythono-dotenv
+python-dotenv
 yagmail
