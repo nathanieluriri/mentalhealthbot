@@ -6,3 +6,4 @@ bcrypt
 python-dotenv
 yagmail
 pymongo[srv]
+streamlit_aggrid

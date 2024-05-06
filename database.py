@@ -83,7 +83,44 @@ def db_login_signup(proceed, user_name, password, first_name='None', last_name='
 
 
 from bson import ObjectId
+def save_New_history(_UserDetails:ObjectId,journal):
+    from pymongo import MongoClient
+    from pymodm import connect, MongoModel, fields
+    from bson import ObjectId
+    from dotenv import load_dotenv
+    import os
+    load_dotenv()
+    
+    MONGO_URI = os.getenv('MONGO_URI')
 
+    connect(MONGO_URI)
+    
+    class User(MongoModel):
+        user_name = fields.CharField(mongo_name="User Name")
+        first_name = fields.CharField(mongo_name="First Name")
+        last_name = fields.CharField(mongo_name="Last Name") 
+        password = fields.CharField(mongo_name="Password")
+        user_number = fields.CharField(mongo_name="User Phone Number") 
+        trustee_number = fields.CharField(mongo_name="Truste Phone Number") 
+        user_email = fields.CharField(mongo_name="User Email") 
+        trustee_email = fields.CharField(mongo_name="Trustee Email") 
+
+    class History(MongoModel):
+        UserDetails = fields.ReferenceField(User,mongo_name="User Details")
+        journal = fields.CharField(mongo_name="Journal")
+
+    def save(_UserDetails,journal):
+        try:
+            new_history = History(UserDetails=_UserDetails,journal=journal)
+            new_history.save()
+            print("Saved")  
+            return new_history
+        except Exception as e:
+            return f"Couldn't save because {e}"
+            
+
+
+    return save(_UserDetails,journal)
 
 
 @st.cache_resource
@@ -134,6 +171,38 @@ def save_history(_UserDetails:ObjectId,journal):
 
 
 
+
+def save_Old_history(_UserDetails:ObjectId,journal,_HistoryID:ObjectId):
+    from pymongo import MongoClient
+    from pymodm import connect, MongoModel, fields
+    from bson import ObjectId
+    from dotenv import load_dotenv
+    import os
+    load_dotenv()
+    
+    MONGO_URI = os.getenv('MONGO_URI')
+
+    connect(MONGO_URI)
+    
+    class User(MongoModel):
+        user_name = fields.CharField(mongo_name="User Name")
+        first_name = fields.CharField(mongo_name="First Name")
+        last_name = fields.CharField(mongo_name="Last Name") 
+        password = fields.CharField(mongo_name="Password")
+        user_number = fields.CharField(mongo_name="User Phone Number") 
+        trustee_number = fields.CharField(mongo_name="Truste Phone Number") 
+        user_email = fields.CharField(mongo_name="User Email") 
+        trustee_email = fields.CharField(mongo_name="Trustee Email") 
+
+    class History(MongoModel):
+        UserDetails = fields.ReferenceField(User,mongo_name="User Details")
+        journal = fields.CharField(mongo_name="Journal")
+
+    def save(_UserDetails,journal):
+       history_entry = History.objects.raw({'_id': _HistoryID}).update({"$set": {"Journal": journal}},upsert=True)
+    return save(_UserDetails,journal)
+
+
 def get_journal_by_history_id(history_id):
     from pymodm import connect
     from pymodm import connect, MongoModel, fields
@@ -169,6 +238,49 @@ def get_journal_by_history_id(history_id):
 
 
 
+def history_ID_query_with_journal(user_id: ObjectId) -> list:
+    """
+    This function retrieves the history IDs and corresponding journal content of a user.
+    """
+    from pymodm import connect
+    from pymodm import connect, MongoModel, fields
+    from dotenv import load_dotenv
+    import os
+    
+    load_dotenv()
+    MONGO_URI = os.getenv('MONGO_URI')
+    
+    connect(MONGO_URI)
+    class User(MongoModel):
+        user_name = fields.CharField(mongo_name="User Name")
+        first_name = fields.CharField(mongo_name="First Name")
+        last_name = fields.CharField(mongo_name="Last Name") 
+        password = fields.CharField(mongo_name="Password")
+        user_number = fields.CharField(mongo_name="User Phone Number") 
+        trustee_number = fields.CharField(mongo_name="Truste Phone Number") 
+        user_email = fields.CharField(mongo_name="User Email") 
+        trustee_email = fields.CharField(mongo_name="Trustee Email") 
+
+    
+    class History(MongoModel):
+        UserDetails = fields.ReferenceField(User, mongo_name="User Details")
+        journal = fields.CharField(mongo_name="Journal")
+    
+
+    history_entries = History.objects.raw({'User Details': user_id})
+    history_with_journal = []
+
+    try:
+        for entry in history_entries:
+            history_with_journal.append({
+                'history_id': entry._id,
+                'journal': entry.journal
+            })
+    except Exception as e:
+        print(f"Error occurred while fetching data: {e}")
+        return []
+
+    return history_with_journal
 
 
 
