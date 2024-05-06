@@ -197,6 +197,7 @@ with textinput:
             print(save_note(st.session_state.thoughts,st.session_state.user_details, _note_id=selected_note))
             
             st.write("Note updated!")
+            st.session_state.notes_history=[]
             for notes in get_notes(st.session_state.user_details):
                 st.session_state.notes_history.append( notes['Journal'])
             st.rerun()
