@@ -178,6 +178,8 @@ with textinput:
             save_history(st.session_state.user_details, st.session_state.thoughts)
             st.session_state.history_ids = history_ID_query(st.session_state.user_details)
             st.write("Note saved!")
+            for notes in get_notes(st.session_state.user_details):
+                st.session_state.notes_history.append( notes['Journal'])
             
             st.rerun()
         
