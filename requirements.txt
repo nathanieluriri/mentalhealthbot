@@ -7,3 +7,4 @@ python-dotenv
 yagmail
 pymongo[srv]
 streamlit_aggrid
+streamlit-lottie
